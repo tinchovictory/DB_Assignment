@@ -8,7 +8,7 @@ BEGIN
     --PERFORM vaciarTodas();
 
     /* Definir una secuencia */
-    DROP SEQUENCE IF EXISTS actorID;
+    --DROP SEQUENCE IF EXISTS actorID;
     CREATE SEQUENCE actorID;
 	
 	/* Primera importacion de los datos */
@@ -23,7 +23,7 @@ BEGIN
 	PERFORM importarFilm2();
 
 	/* Normalizar los nuevos datos de la tabla film */
-	--PERFORM insertaDatos();
+	PERFORM insertaDatos();
 
 END;
 $$; 

@@ -11,8 +11,8 @@ EXECUTE PROCEDURE updateCantidadFilms();
 CREATE OR REPLACE FUNCTION updateCantidadFilms()
 RETURNS Trigger AS $$
 BEGIN
-        UPDATE actor SET cantidad_films = cantidad_films + 1 WHERE id_actor = new.id_actor;
-        RETURN new;
+	UPDATE actor SET cantidad_films = cantidad_films + 1 WHERE id_actor = new.id_actor;
+	RETURN new;
 END
 $$ LANGUAGE plpgsql;
 /
@@ -33,7 +33,13 @@ BEGIN
 	LOOP
 		FETCH myCursor INTO aFilm;
 		EXIT WHEN NOT FOUND;
-		INSERT INTO pelicula VALUES (aFilm.*);
+
+		BEGIN
+			INSERT INTO pelicula VALUES (aFilm.*);
+		EXCEPTION WHEN unique_violation THEN
+			-- no hago nada y paso al siguiente
+		END;
+
 	END LOOP;
 	CLOSE myCursor;
 END
@@ -52,22 +58,16 @@ $$ LANGUAGE plpgsql;
 
 
 --/
-CREATE OR REPLACE FUNCTION checkInsertDirector(IN id_director TEXT, IN id_film TEXT)
+CREATE OR REPLACE FUNCTION checkInsertDirector(IN id_director INT, IN id_film TEXT)
 RETURNS VOID AS $$
 BEGIN
-       IF(isDirector(id_director)) THEN
-                insert into dirige values(id_director,id_film);
-          END IF;
-END
-$$ LANGUAGE plpgsql;
-/
-
-CREATE OR REPLACE FUNCTION checkInsertPais(IN id_film TEXT, IN id_country TEXT)
-RETURNS VOID AS $$
-BEGIN
-       IF(isPais(id_country)) THEN
-			INSERT INTO pertenece VALUES(id_film,id_country1);
-		END IF;
+	IF(isDirector(id_director)) THEN
+		BEGIN
+			INSERT INTO dirige VALUES(id_director,id_film);
+		EXCEPTION WHEN unique_violation THEN
+			-- no hago nada y paso al siguiente
+		END;
+	END IF;
 END
 $$ LANGUAGE plpgsql;
 /
@@ -119,6 +119,21 @@ $$ LANGUAGE plpgsql;
 /
 
 
+--/
+CREATE OR REPLACE FUNCTION checkInsertPais(IN id_film TEXT, IN id_country INT)
+RETURNS VOID AS $$
+BEGIN
+	IF(isPais(id_country)) THEN
+		BEGIN
+			INSERT INTO pertenece VALUES(id_film,id_country);
+		EXCEPTION WHEN unique_violation THEN
+			-- no hago nada y paso al siguiente
+		END;
+	END IF;
+END
+$$ LANGUAGE plpgsql;
+/
+
 
 --/
 CREATE OR REPLACE FUNCTION agregarPertenece()
@@ -158,7 +173,7 @@ AS $$
 BEGIN
 	IF(act NOT IN (SELECT nombre FROM actor))
 	THEN
-		INSERT INTO actor VALUES(NEXTVAL('actorID'), act, 0);
+		INSERT INTO actor VALUES(NEXTVAL('actorID'), act, DEFAULT);
 	END IF;
 END
 $$ LANGUAGE plpgsql;
@@ -172,7 +187,11 @@ DECLARE
 	id_act actor.id_actor%TYPE;
 BEGIN
 	SELECT id_actor INTO id_act FROM actor WHERE nombre = act;
-	INSERT INTO actua values(id_act, idFilm);
+	BEGIN
+		INSERT INTO actua values(id_act, idFilm);
+	EXCEPTION WHEN unique_violation THEN
+		-- no hago nada y paso al siguiente
+	END;
 END
 $$ LANGUAGE plpgsql;
 /
