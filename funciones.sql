@@ -48,7 +48,7 @@ $$ LANGUAGE plpgsql;
 
 
 --/
-CREATE OR REPLACE FUNCTION isDirector(IN idDirector INT)
+CREATE OR REPLACE FUNCTION isDirector(IN idDirector director.id_director%TYPE)
 RETURNS BOOLEAN AS $$      
 BEGIN
 	RETURN (1 = (SELECT COUNT(*) FROM director WHERE id_director = idDirector));
@@ -58,7 +58,7 @@ $$ LANGUAGE plpgsql;
 
 
 --/
-CREATE OR REPLACE FUNCTION checkInsertDirector(IN id_director INT, IN id_film TEXT)
+CREATE OR REPLACE FUNCTION checkInsertDirector(IN id_director dirige.id_director%TYPE, IN id_film dirige.id_film%TYPE)
 RETURNS VOID AS $$
 BEGIN
 	IF(isDirector(id_director)) THEN
@@ -110,7 +110,7 @@ $$ LANGUAGE plpgsql;
 
 
 --/
-CREATE OR REPLACE FUNCTION isPais(IN idPais INT)
+CREATE OR REPLACE FUNCTION isPais(IN idPais pais.id_country%TYPE)
 RETURNS BOOLEAN AS $$
 BEGIN
 	RETURN (1 = (SELECT COUNT(*) FROM pais WHERE id_country = idPais));
@@ -120,7 +120,7 @@ $$ LANGUAGE plpgsql;
 
 
 --/
-CREATE OR REPLACE FUNCTION checkInsertPais(IN id_film TEXT, IN id_country INT)
+CREATE OR REPLACE FUNCTION checkInsertPais(IN id_film pertenece.id_film%TYPE, IN id_country pertenece.id_country%TYPE)
 RETURNS VOID AS $$
 BEGIN
 	IF(isPais(id_country)) THEN
@@ -167,7 +167,7 @@ $$ LANGUAGE plpgsql;
 
 
 --/
-CREATE OR REPLACE FUNCTION agregarActor(IN act VARCHAR)
+CREATE OR REPLACE FUNCTION agregarActor(IN act actor.nombre%TYPE)
 RETURNS VOID
 AS $$
 BEGIN
@@ -180,7 +180,7 @@ $$ LANGUAGE plpgsql;
 /
 
 --/
-CREATE OR REPLACE FUNCTION agregarActua(IN act VARCHAR, IN idFilm VARCHAR)
+CREATE OR REPLACE FUNCTION agregarActua(IN act actuar.id_act%TYPE, IN idFilm actor.id_film%TYPE)
 RETURNS VOID
 AS $$
 DECLARE
